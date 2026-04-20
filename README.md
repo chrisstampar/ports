@@ -1,5 +1,9 @@
 # Ports
 
+<p align="center">
+  <img src="assets/AppIcon.png" alt="Ports app icon" width="128" height="128" />
+</p>
+
 [![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange.svg)](https://swift.org)
 [![macOS](https://img.shields.io/badge/platform-macOS%2013+-blue.svg)](https://developer.apple.com/macos/)
 
@@ -86,7 +90,7 @@ Continuous integration (`.github/workflows/ci.yml`) runs `swift test --quiet` on
 
 ## Security
 
-Ports runs **locally** and does not send port or process data to remote servers. It executes `/bin/sh -c` for `lsof` / `ps` only. Do not commit secrets, API keys, or personal machine paths into the repository.
+Ports runs **locally** and does not send port or process data to remote servers. It executes `/bin/sh -c` for `lsof` / `ps` only.
 
 ## License
 
