@@ -22,7 +22,7 @@ A lightweight **macOS menubar app** (SwiftUI) that lists listening **localhost T
 ## Requirements
 
 - macOS **13** or later
-- **Xcode** or Swift toolchain (`swift` on the PATH)
+- **Xcode** (from the App Store) — needed to run `swift test` / XCTest and to build this app reliably. Command Line Tools alone are **not** enough: you will see `no such module 'XCTest'` without full Xcode.
 
 ## Clone and build
 
@@ -42,6 +42,8 @@ Install to `/Applications`:
 ```bash
 ./build.sh --install
 ```
+
+Flags can be combined, e.g. `./build.sh --skip-tests --install` (see **Troubleshooting** if you must skip tests).
 
 Run locally:
 
@@ -97,6 +99,17 @@ Ports runs **locally** and does not send port or process data to remote servers.
 This project is licensed under the [MIT License](LICENSE).
 
 ## Troubleshooting
+
+**`no such module 'XCTest'` when running `./build.sh` or `swift test`** — Your Mac is almost certainly using **Command Line Tools only**. Install **Xcode** from the App Store, open it once, then run:
+
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+sudo xcodebuild -license accept   # if the license prompt appears
+```
+
+Then `./build.sh` again. The build script also detects this case and prints the same hint.
+
+**Skip tests (emergency only)** — `SKIP_TESTS=1 ./build.sh` or `./build.sh --skip-tests` skips `swift test` so you can still produce `Ports.app` without XCTest. Prefer fixing Xcode as above.
 
 **No ports listed** — Start a dev server (e.g. `python3 -m http.server 8765`). Ports in the default excluded set (including many ephemeral ranges) are hidden; adjust **Settings → Excluded ports**.
 

@@ -7,11 +7,51 @@ cd "$SCRIPT_DIR"
 APP_NAME="Ports"
 APP_BUNDLE="${APP_NAME}.app"
 
-echo "==> Running tests..."
-swift test --quiet 2>&1 || {
-    echo "Tests failed. Fix them before building."
-    exit 1
+# Parse flags (order-independent)
+INSTALL=0
+SKIP_TESTS="${SKIP_TESTS:-0}"
+for arg in "$@"; do
+    case "$arg" in
+        --install) INSTALL=1 ;;
+        --skip-tests) SKIP_TESTS=1 ;;
+    esac
+done
+
+ensure_xcode_for_tests() {
+    if [[ "$SKIP_TESTS" == "1" ]]; then
+        echo "==> Skipping tests (SKIP_TESTS=1 or --skip-tests)."
+        return 0
+    fi
+    local xp
+    xp="$(xcode-select -p 2>/dev/null)" || true
+    if [[ "$xp" == *CommandLineTools* ]]; then
+        echo "==> ERROR: Swift tests require full Xcode — XCTest is not available with Command Line Tools only."
+        echo ""
+        echo "    Fix:"
+        echo "      1. Install Xcode from the App Store (not only CLT)."
+        echo "      2. Open Xcode once to finish installing components."
+        echo "      3. Point the active developer directory at Xcode:"
+        echo "           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
+        echo "      4. If prompted: sudo xcodebuild -license accept"
+        echo ""
+        echo "    Then run ./build.sh again."
+        echo ""
+        echo "    Emergency build without tests (not recommended for CI):"
+        echo "           SKIP_TESTS=1 ./build.sh"
+        echo "           ./build.sh --skip-tests"
+        exit 1
+    fi
 }
+
+ensure_xcode_for_tests
+
+if [[ "$SKIP_TESTS" != "1" ]]; then
+    echo "==> Running tests..."
+    swift test --quiet 2>&1 || {
+        echo "Tests failed. Fix them before building."
+        exit 1
+    }
+fi
 
 echo "==> Building release..."
 swift build -c release
@@ -52,7 +92,7 @@ codesign --force --sign - "$APP_BUNDLE"
 
 echo "==> Done. Run with:  open ${APP_BUNDLE}"
 
-if [[ "${1:-}" == "--install" ]]; then
+if [[ "$INSTALL" == "1" ]]; then
     echo "==> Installing to /Applications..."
     rm -rf "/Applications/${APP_BUNDLE}"
     cp -R "$APP_BUNDLE" /Applications/
