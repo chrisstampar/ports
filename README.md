@@ -100,14 +100,35 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Troubleshooting
 
-**`no such module 'XCTest'` when running `./build.sh` or `swift test`** — Your Mac is almost certainly using **Command Line Tools only**. Install **Xcode** from the App Store, open it once, then run:
+**`no such module 'XCTest'` when running `./build.sh` or `swift test`** — Your Mac is almost certainly using **Command Line Tools only**. Install **Xcode** from the Mac App Store, open it once to finish installing components, then point `xcode-select` at the **real** app path (see below).
+
+**`xcode-select: error: invalid developer directory '/Applications/Xcode.app/Contents/Developer'`** — That folder does not exist on your machine. Common cases:
+
+1. **Xcode is not installed yet** — Install “Xcode” from the App Store (several GB). “Command Line Tools” alone is not enough for `swift test`.
+
+2. **Xcode has a different name** — For example **Xcode-beta**:
+
+   ```bash
+   ls /Applications/Xcode*.app
+   sudo xcode-select -s /Applications/Xcode-beta.app/Contents/Developer
+   ```
+
+3. **Find where Xcode is**:
+
+   ```bash
+   mdfind 'kMDItemCFBundleIdentifier == "com.apple.dt.Xcode"'
+   ```
+
+   Use the path it prints, e.g. `sudo xcode-select -s /path/to/Xcode.app/Contents/Developer`.
+
+Then accept the license if prompted and retry:
 
 ```bash
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-sudo xcodebuild -license accept   # if the license prompt appears
+sudo xcodebuild -license accept
+./build.sh
 ```
 
-Then `./build.sh` again. The build script also detects this case and prints the same hint.
+The build script also detects Command-Line-Tools-only setups and prints a short hint before tests run.
 
 **Skip tests (emergency only)** — `SKIP_TESTS=1 ./build.sh` or `./build.sh --skip-tests` skips `swift test` so you can still produce `Ports.app` without XCTest. Prefer fixing Xcode as above.
 
